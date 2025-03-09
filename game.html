@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Connect Four</title>
+    <link href="game.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body style="background-color: #f2f0ef">
+    <div id="colButtons" class="container-fluid" style="display: flex">
+      <div>
+        <button
+          id="col0"
+          class="columnButton"
+          onclick="playerToken(0)"
+        ></button>
+      </div>
+      <div>
+        <button
+          id="col1"
+          class="columnButton"
+          onclick="playerToken(1)"
+        ></button>
+      </div>
+      <div>
+        <button
+          id="col2"
+          class="columnButton"
+          onclick="playerToken(2)"
+        ></button>
+      </div>
+      <div>
+        <button
+          id="col3"
+          class="columnButton"
+          onclick="playerToken(3)"
+        ></button>
+      </div>
+      <div>
+        <button
+          id="col4"
+          class="columnButton"
+          onclick="playerToken(4)"
+        ></button>
+      </div>
+      <div>
+        <button
+          id="col5"
+          class="columnButton"
+          onclick="playerToken(5)"
+        ></button>
+      </div>
+      <div>
+        <button
+          id="col6"
+          class="columnButton"
+          onclick="playerToken(6)"
+        ></button>
+      </div>
+    </div>
+    <br />
+    <div id="boardId" class="gameBoard container-fluid">
+      <div class="emptyCoin"></div>
+    </div>
+  </body>
+  <script>
+    var chips = "";
+    for (let i = 1; i <= 42; i++) {
+      chips += "<div class='emptyCoin' id='chip" + i + "'></div>";
+    }
+    document.getElementById("boardId").innerHTML = chips;
+
+    var board = [
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+    ];
+
+    var gameStatus = true;
+
+    function placeToken(column, color, player) {
+      console.log(column);
+      for (let i = 5; i >= 0; i--) {
+        if (board[i][column] == 0) {
+          board[i][column] = player;
+          document.getElementById(
+            "chip" + (7 * i + column + 1)
+          ).style.backgroundColor = color;
+          console.log("chip" + (7 * i + column + 1));
+          return i;
+        }
+      }
+    }
+
+    function playerToken(column) {
+      let row = placeToken(column, "red", 1);
+      checkWin(row, column, 1);
+      if (gameStatus) {
+        agentToken();
+      }
+    }
+
+    function agentToken() {
+      var column = 0;
+      var row = 0;
+      var validCol = [];
+      for (let i = 0; i < 7; i++) {
+        document.getElementById("col" + i).disabled = true;
+        if (board[0][i] == 0) {
+          validCol.push(i);
+        }
+      }
+      var maxVal = [0, -4];
+      var minVal = [0, 4];
+      for (let i = 0; i < validCol.length; i++) {
+        var curRow = -1;
+        var curCol = -1;
+        curCol = validCol[i];
+        for (let j = 5; j >= 0; j--) {
+          if (board[j][curCol] == 0) {
+            curRow = j;
+            break;
+          }
+        }
+        var vals = [];
+        vals[0] = horizontalValue(curRow, curCol, 2);
+        vals[1] = verticalValue(curRow, curCol, 2);
+        vals[2] = diagonalNEValue(curRow, curCol, 2);
+        vals[3] = diagonalNWValue(curRow, curCol, 2);
+        vals[4] = horizontalValue(curRow, curCol, 1);
+        vals[5] = verticalValue(curRow, curCol, 1);
+        vals[6] = diagonalNEValue(curRow, curCol, 1);
+        vals[7] = diagonalNWValue(curRow, curCol, 1);
+        for (let k = 0; k < 4; k++) {
+          if (maxVal[1] < vals[k]) {
+            maxVal[0] = curCol;
+            maxVal[1] = vals[k];
+          }
+        }
+        for (let k = 4; k < 8; k++) {
+          if (minVal[1] > vals[k]) {
+            minVal[0] = curCol;
+            minVal[1] = vals[k];
+          }
+        }
+      }
+      if (maxVal[1] > 3) {
+        row = placeToken(maxVal[0], "#FFD300", 2);
+        column = maxVal[0];
+      } else if (minVal[1] < -3) {
+        row = placeToken(minVal[0], "#FFD300", 2);
+        column = minVal[0];
+      } else {
+        row = placeToken(maxVal[0], "#FFD300", 2);
+        column = maxVal[0];
+      }
+      for (let i = 0; i < 7; i++) {
+        document.getElementById("col" + i).disabled = false;
+      }
+      checkWin(row, column, 2);
+    }
+
+    function horizontalValue(row, col, player) {
+      let leftBlank = false;
+      let rightBlank = false;
+      let val = 1;
+      for (let i = 1; i < 4; i++) {
+        if (col + i < 7) {
+          if (board[row][col + i] == player) {
+            val++;
+          } else if (board[row][col + i] == 0) {
+            rightBlank = true;
+            break;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+      for (let i = 1; i < 4; i++) {
+        if (col - i >= 0) {
+          if (board[row][col - i] == player) {
+            val++;
+          } else if (board[row][col - i] == 0) {
+            leftBlank = true;
+            break;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+      if (row == 5 && leftBlank && rightBlank && val == 3) {
+        val++;
+      }
+      if (player == 2) {
+        return val;
+      }
+      return -val;
+    }
+
+    function verticalValue(row, col, player) {
+      let val = 1;
+      for (let i = 1; i < 4; i++) {
+        if (row + i < 6) {
+          if (board[row + i][col] == player) {
+            val++;
+          }
+        } else {
+          break;
+        }
+      }
+      if (
+        (row == 2 && val == 1) ||
+        (row == 1 && val <= 2) ||
+        (row == 0 && val <= 3)
+      ) {
+        return 0;
+      }
+      if (player == 2) {
+        return val;
+      }
+      return -val;
+    }
+
+    function diagonalNEValue(row, col, player) {
+      let val = 1;
+      for (let i = 1; i < 4; i++) {
+        if (row + i >= 6) {
+          break;
+        }
+        if (board[row + i][col + i] == player) {
+          val++;
+        } else {
+          break;
+        }
+      }
+      for (let i = 1; i < 4; i++) {
+        if (row - i < 0 || col - i < 0) {
+          break;
+        }
+        if (board[row - i][col - i] == player) {
+          val++;
+        } else {
+          break;
+        }
+      }
+      if (player == 2) {
+        return val;
+      }
+      return -val;
+    }
+
+    function diagonalNWValue(row, col, player) {
+      let val = 1;
+      for (let i = 1; i < 4; i++) {
+        if (row - i < 0 || col + i >= 7) {
+          break;
+        }
+        if (board[row - i][col + i] == player) {
+          val++;
+        } else {
+          break;
+        }
+      }
+      for (let i = 1; i < 4; i++) {
+        if (row + i >= 6 || col - i < 0) {
+          break;
+        }
+        if (board[row + i][col - i] == player) {
+          val++;
+        } else {
+          break;
+        }
+      }
+      if (player == 2) {
+        return val;
+      }
+      return -val;
+    }
+
+    function checkWin(row, column, player) {
+      let status = 0;
+      for (let i = row; i < 6; i++) {
+        if (board[i][column] == player) {
+          status++;
+        } else {
+          break;
+        }
+        if (status >= 4) {
+          gameOver(player);
+        }
+      }
+      status = 0;
+      for (let i = column; i < 7; i++) {
+        if (board[row][i] == player) {
+          status++;
+        } else {
+          break;
+        }
+      }
+      for (let i = column - 1; i >= 0; i--) {
+        if (board[row][i] == player) {
+          status++;
+        } else {
+          break;
+        }
+      }
+      if (status >= 4) {
+        gameOver(player);
+      }
+      status = 0;
+      let count = 0;
+      for (let i = row; i >= 0; i--) {
+        if (column - count < 0) {
+          break;
+        }
+        if (board[i][column - count] == player) {
+          status++;
+        }
+        count++;
+      }
+      count = 1;
+      for (let i = row; i < 6; i++) {
+        if (column + count > 6) {
+          break;
+        }
+        if (board[i][column + count] == player) {
+          status++;
+        }
+        count++;
+      }
+      if (status >= 4) {
+        gameOver(player);
+      }
+      status = 0;
+      count = 0;
+      for (let i = row; i >= 0; i--) {
+        if (column - count < 0) {
+          break;
+        }
+        if (board[i][column + count] == player) {
+          status++;
+        }
+        count++;
+      }
+      count = 1;
+      for (let i = row; i < 6; i++) {
+        if (column + count > 6) {
+          break;
+        }
+        if (board[i][column - count] == player) {
+          status++;
+        }
+        count++;
+      }
+      if (status >= 4) {
+        gameOver(player);
+      }
+    }
+
+    function gameOver(player) {
+      gameStatus = false;
+      for (let i = 0; i < 7; i++) {
+        document.getElementById("col" + i).disabled = true;
+      }
+      if (player == 1) {
+        setTimeout(function () {
+          window.alert("You won!");
+        }, 250);
+      } else {
+        setTimeout(function () {
+          window.alert("Minji's robot won!");
+        }, 250);
+      }
+    }
+  </script>
+</html>
