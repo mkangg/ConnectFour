@@ -133,13 +133,13 @@
         vals[6] = diagonalNEValue(curRow, curCol, 1);
         vals[7] = diagonalNWValue(curRow, curCol, 1);
         for (let k = 0; k < 4; k++) {
-          if (maxVal[1] < vals[k]) {
+          if (maxVal[1] <= vals[k]) {
             maxVal[0] = curCol;
             maxVal[1] = vals[k];
           }
         }
         for (let k = 4; k < 8; k++) {
-          if (minVal[1] > vals[k]) {
+          if (minVal[1] >= vals[k]) {
             minVal[0] = curCol;
             minVal[1] = vals[k];
           }
@@ -283,89 +283,16 @@
     }
 
     function checkWin(row, column, player) {
-      let status = 0;
-      for (let i = row; i < 6; i++) {
-        if (board[i][column] == player) {
-          status++;
-        } else {
-          break;
-        }
-        if (status >= 4) {
-          gameOver(player);
-        }
-      }
-      status = 0;
-      for (let i = column; i < 7; i++) {
-        if (board[row][i] == player) {
-          status++;
-        } else {
-          break;
-        }
-      }
-      for (let i = column - 1; i >= 0; i--) {
-        if (board[row][i] == player) {
-          status++;
-        } else {
-          break;
-        }
-      }
-      if (status >= 4) {
-        gameOver(player);
-      }
-      status = 0;
-      let count = 0;
-      for (let i = row; i >= 0; i--) {
-        if (column - count < 0) {
-          break;
-        }
-        if (board[i][column - count] == player) {
-          status++;
-        } else {
-          break;
-        }
-        count++;
-      }
-      count = 1;
-      for (let i = row; i < 6; i++) {
-        if (column + count > 6) {
-          break;
-        }
-        if (board[i][column + count] == player) {
-          status++;
-        } else {
-          break;
-        }
-        count++;
-      }
-      if (status >= 4) {
-        gameOver(player);
-      }
-      status = 0;
-      count = 0;
-      for (let i = row; i >= 0; i--) {
-        if (column - count < 0) {
-          break;
-        }
-        if (board[i][column + count] == player) {
-          status++;
-        } else {
-          break;
-        }
-        count++;
-      }
-      count = 1;
-      for (let i = row; i < 6; i++) {
-        if (column + count > 6) {
-          break;
-        }
-        if (board[i][column - count] == player) {
-          status++;
-        } else {
-          break;
-        }
-        count++;
-      }
-      if (status >= 4) {
+      let vertVal = verticalValue(row, column, player);
+      let horiVal = horizontalValue(row, column, player);
+      let neVal = diagonalNEValue(row, column, player);
+      let nwVal = diagonalNWValue(row, column, player);
+      if (
+        Math.abs(vertVal) >= 4 ||
+        Math.abs(horiVal) >= 4 ||
+        Math.abs(neVal) >= 4 ||
+        Math.abs(nwVal) >= 4
+      ) {
         gameOver(player);
       }
     }
