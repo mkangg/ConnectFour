@@ -4,7 +4,7 @@
     <title>Connect Four</title>
     <link href="game.css" rel="stylesheet" type="text/css" />
   </head>
-  <body style="background-color: #f2f0ef">
+  <body style="background-color: #cccccc">
     <div id="colButtons" class="container-fluid" style="display: flex">
       <div>
         <button
@@ -169,7 +169,10 @@
         if (col + i < 7) {
           if (board[row][col + i] == player) {
             val++;
-          } else if (board[row][col + i] == 0) {
+          } else if (
+            board[row][col + i] == 0 &&
+            (row == 5 || board[row + 1][col + i] != 0)
+          ) {
             rightBlank = true;
             break;
           } else {
@@ -183,7 +186,10 @@
         if (col - i >= 0) {
           if (board[row][col - i] == player) {
             val++;
-          } else if (board[row][col - i] == 0) {
+          } else if (
+            board[row][col - i] == 0 &&
+            (row == 5 || board[row + 1][col - i] != 0)
+          ) {
             leftBlank = true;
             break;
           } else {
@@ -194,7 +200,7 @@
         }
       }
       if (leftBlank && rightBlank && val >= 2) {
-        val++;
+        val = 3.5;
       }
       if (player == 2) {
         return val;
@@ -214,9 +220,10 @@
         }
       }
       if (
-        (row == 2 && val <= 1) ||
-        (row == 1 && val <= 2) ||
-        (row == 0 && val <= 3)
+        player == 2 &&
+        ((row == 2 && val <= 1) ||
+          (row == 1 && val <= 2) ||
+          (row == 0 && val <= 3))
       ) {
         return 0;
       }
